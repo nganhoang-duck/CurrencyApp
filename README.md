@@ -1,2 +1,2 @@
 # CurrencyApp
-Using MySQL Server, Java Swing, Java RMI
+Using MySQL Server, Java Swing, Java RMI 
