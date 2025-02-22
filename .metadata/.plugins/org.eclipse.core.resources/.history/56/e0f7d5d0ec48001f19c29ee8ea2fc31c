@@ -1,0 +1,23 @@
+package clientrmi;
+
+import java.awt.Component;
+import java.awt.Image;
+
+import javax.swing.DefaultListCellRenderer;
+import javax.swing.ImageIcon;
+import javax.swing.JLabel;
+import javax.swing.JList;
+
+public class IconComboBoxRenderer extends DefaultListCellRenderer {
+    public Component getListCellRendererComponent(JList<?> list, Object value, int index,
+                                                  boolean isSelected, boolean cellHasFocus) {
+        JLabel label = (JLabel) super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
+        if (value instanceof Country) {
+            Country country = (Country) value;
+            ImageIcon icon = new ImageIcon("D:/image/" + country.getFlag());
+            label.setIcon(icon);
+            label.setText("");
+        }
+        return label;
+    }
+}

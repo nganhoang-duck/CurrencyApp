@@ -1,0 +1,95 @@
+package clientrmi;
+import java.util.Scanner;
+import java.util.ArrayList;
+
+import interfacermi.IChuyenDoiTienTe;
+
+import java.net.MalformedURLException;
+import java.rmi.Naming;
+import java.rmi.NotBoundException;
+import java.rmi.RemoteException;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+
+public class Client {
+    public static void main(String[] args) {
+        String url = "jdbc:mysql://localhost:3306/currencydb";
+        String user = "root";
+        String pass = "";
+
+        try {
+            // Kết nối với CSDL
+            Connection conn = DriverManager.getConnection(url, user, pass);
+            System.out.println("Kết nối thành công!");
+
+            // Hiển thị danh sách Flag - Code (Territory)
+            String query = "SELECT Flag, Code, Territory FROM exchangerate";
+            PreparedStatement ps = conn.prepareStatement(query);
+            ResultSet rs = ps.executeQuery();
+
+            ArrayList<String> danhSach = new ArrayList<>();
+            while (rs.next()) {
+                String flag = rs.getString("Flag");
+                String code = rs.getString("Code");
+                String territory = rs.getString("Territory");
+                String entry = flag + " - " + code + " (" + territory + ")";
+                danhSach.add(entry);
+            }
+
+            System.out.println("Danh sách Flag - Code (Territory):");
+            for (String entry : danhSach) {
+                System.out.println(entry);
+            }
+
+            // Nhập tên 2 quốc gia và số tiền từ console
+            Scanner scanner = new Scanner(System.in);
+            System.out.print("Nhập tên quốc gia 1: ");
+            String quocGia1 = scanner.nextLine();
+            System.out.print("Nhập tên quốc gia 2: ");
+            String quocGia2 = scanner.nextLine();
+            System.out.print("Nhập số tiền: ");
+            double soTien = scanner.nextDouble();
+
+            // Truy vấn tỉ giá của 2 quốc gia
+            query = "SELECT * FROM exchangerate WHERE Territory = ? OR Territory = ?";
+            ps = conn.prepareStatement(query);
+            ps.setString(1, quocGia1);
+            ps.setString(2, quocGia2);
+            rs = ps.executeQuery();
+
+            double tiGia1 = 0;
+            double tiGia2 = 0;
+            while (rs.next()) {
+                String quocGia = rs.getString("Territory");
+                double tiGia = rs.getDouble("ExchangeRate");
+                if (quocGia.equals(quocGia1)) {
+                    tiGia1 = tiGia;
+                } else if (quocGia.equals(quocGia2)) {
+                    tiGia2 = tiGia;
+                }
+            }
+            if (tiGia1 == 0 || tiGia2 == 0) {
+                System.out.println("Quốc gia không hợp lệ");
+            } else {
+                // Gọi phương thức chuyenDoiTienTe
+                IChuyenDoiTienTe cdtt = (IChuyenDoiTienTe) Naming.lookup("rmi://localhost/chuyenDoiTienTe");
+                double result = cdtt.chuyenDoiTienTe(tiGia1, tiGia2, soTien);
+                System.out.println("Kết quả chuyển đổi: " + result);
+            }
+
+            // Đóng kết nối
+            conn.close();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } catch (MalformedURLException e) {
+            e.printStackTrace();
+        } catch (RemoteException e) {
+            e.printStackTrace();
+        } catch (NotBoundException e) {
+            e.printStackTrace();
+        }
+    }
+}

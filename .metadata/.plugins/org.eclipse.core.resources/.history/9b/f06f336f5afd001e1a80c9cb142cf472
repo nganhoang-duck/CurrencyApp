@@ -1,0 +1,8 @@
+package interfacermi;
+
+import java.rmi.Remote;
+import java.rmi.RemoteException;
+
+public interface ICheckNguyenTo extends Remote{
+	public Boolean checkNguyenTo(int n) throws RemoteException;
+}

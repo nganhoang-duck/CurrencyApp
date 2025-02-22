@@ -1,0 +1,8 @@
+package interfacermi;
+
+import java.rmi.Remote;
+import java.rmi.RemoteException;
+
+public interface IChuyenTienTe extends Remote{
+	public double checkNguyenTo(String quocGia1, String quocGia2, double money) throws RemoteException;
+}

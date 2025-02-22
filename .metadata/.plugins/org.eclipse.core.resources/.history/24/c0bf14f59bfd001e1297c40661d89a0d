@@ -1,0 +1,66 @@
+package serverrmi;
+
+import java.net.MalformedURLException;
+import java.rmi.Naming;
+import java.rmi.RemoteException;
+import java.rmi.registry.LocateRegistry;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+
+public class Server {
+
+	public static void main(String[] args) {
+		try {
+			//Tạo Object
+			ChuyenTienTe ctt = new ChuyenTienTe();
+			
+			//Đăng kí cổng
+			LocateRegistry.createRegistry(1099);
+			
+			//Đưa ra cổng
+			Naming.rebind("rmi://localhost/checknguyento", ctt);
+			
+			String url = "jdbc:mysql://localhost:3306/currencydb";
+			String user = "root";
+			String pass = "";
+			try {
+				//1. Tạo đối tượng Connection để kết nối với CSDL
+				Connection conn = DriverManager.getConnection(url, user, pass);
+				System.out.println("Kết nối thành công!");
+				
+				//2. Tạo câu lệnh truy vấn Sql
+				String sql = "SELECT * FROM table WHERE from_currency=? AND to_currency=?";
+				
+				//3. Tạo đối tượng PrepareStatement để tương tác với CSDL
+				PreparedStatement ps = conn.prepareStatement(sql);
+				ps.setString(1, "VND");
+				ps.setString(2, "USD");	
+				
+				//4. Thực thi câu lệnh truy vấn
+				ResultSet rs = ps.executeQuery();
+				
+				//5. Xử lý kết quả truy vấn
+				while(rs.next()) {
+					System.out.println(rs.getString(1));// cột 1 kiểu String
+					System.out.println(rs.getDouble(2));// cột 2 kiểu Double
+				}
+			} catch (SQLException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+
+		} catch (RemoteException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (MalformedURLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		
+	}
+
+}

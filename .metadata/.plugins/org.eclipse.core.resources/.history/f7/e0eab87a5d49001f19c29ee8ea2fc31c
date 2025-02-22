@@ -1,0 +1,136 @@
+package clientrmi;
+
+import javax.swing.*;
+import javax.swing.border.Border;
+import javax.swing.border.EmptyBorder;
+
+import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
+
+public class Client extends JFrame {
+    private JComboBox<Country> fromComboBox;
+    private JComboBox<Country> toComboBox;
+    private List<Country> countryList;
+
+    public Client() {
+    	String url = "jdbc:mysql://localhost:3306/currencydb";
+        String user = "root";
+        String pass = "";
+        countryList = new ArrayList<>();
+
+        try {
+        	//Kết nối với CSDL
+            Connection conn = DriverManager.getConnection(url, user, pass);
+            System.out.println("Kết nối thành công!");
+
+            String query = "SELECT Flag, ExchangeRate, Code, Territory FROM exchangerate";
+            PreparedStatement ps = conn.prepareStatement(query);
+            ResultSet rs = ps.executeQuery();
+
+	        setTitle("Ứng dụng chuyển đổi tiền tệ");
+	        JPanel mainPanel = new JPanel(new BorderLayout());
+	        JLabel title = new JLabel("CHUYỂN ĐỔI TIỀN TỆ");
+	        title.setFont(new Font("Arial", Font.BOLD, 30));
+	        title.setHorizontalAlignment(SwingConstants.CENTER);
+	        title.setBorder(new EmptyBorder(30, 0, 10, 0));
+	        mainPanel.add(title, BorderLayout.NORTH);
+	
+	        JPanel containerPanel = new JPanel(new GridBagLayout()); 
+	
+	        //From
+	        GridBagConstraints gbc = new GridBagConstraints();
+	        gbc.fill = GridBagConstraints.HORIZONTAL;
+	        gbc.gridx = 0;
+	        gbc.gridy = 0;
+	        containerPanel.add(new JLabel("Chuyển đổi từ:"), gbc);
+	        
+	        //To
+	        gbc.gridx = 2;
+	        gbc.gridy = 0;
+	        containerPanel.add(new JLabel("Chuyển đổi thành:"), gbc);
+	        
+	        //Amount
+	        gbc.gridx = 0;
+	        gbc.gridy = 2;
+	        containerPanel.add(new JTextField(30), gbc);
+	        
+	        //Result
+	        gbc.gridx = 0;
+	        gbc.gridy = 2;
+	        containerPanel.add(new JTextField(30), gbc);
+	
+	        // Exchange button
+	        /*String imagePath = "D:/exchangeIcon.png";
+	        ImageIcon imageIcon = new ImageIcon(imagePath);
+	        JButton exchangeButton = new JButton(imageIcon);*/
+	        
+	        JButton exchangeButton = new JButton("Reverse");
+	        
+	        exchangeButton.addActionListener(new ActionListener() {
+	            @Override
+	            public void actionPerformed(ActionEvent e) {
+	                exchangeValues();
+	            }
+	        });
+	        gbc.gridx = 1;
+	        gbc.gridy = 1;
+	        containerPanel.add(exchangeButton, gbc);
+	
+	        // Dropdown
+	        while (rs.next()) {
+	            String territory = rs.getString("Territory");
+	            double exchangeRate = rs.getDouble("ExchangeRate");
+	            String flag = rs.getString("Flag");
+	            String code = rs.getString("Code");
+	            
+	            Country country = new Country(territory, exchangeRate, flag, code);
+	            countryList.add(country);
+	        }
+	        fromComboBox = new JComboBox<>(countryList.toArray(new Country[0]));
+	        fromComboBox.setRenderer(new IconComboBoxRenderer());
+	        gbc.gridx = 0;
+	        gbc.gridy = 1;
+	        containerPanel.add(fromComboBox, gbc);
+
+	        toComboBox = new JComboBox<>(countryList.toArray(new Country[1]));
+	        toComboBox.setRenderer(new IconComboBoxRenderer());
+	        gbc.gridx = 2;
+	        gbc.gridy = 1;
+	        containerPanel.add(toComboBox, gbc);
+	        
+	        containerPanel.setBorder(new EmptyBorder(10, 0, 10, 0));
+	        mainPanel.add(containerPanel, BorderLayout.CENTER);
+	        add(mainPanel);
+	
+	        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+	        setSize(800, 300);
+	        setLocationRelativeTo(null);
+	        setVisible(true);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } 
+    }
+
+    private void exchangeValues() {
+        Country selectedFromValue = (Country) fromComboBox.getSelectedItem();
+        Country selectedToValue = (Country) toComboBox.getSelectedItem();
+
+        fromComboBox.setSelectedItem(selectedToValue);
+        toComboBox.setSelectedItem(selectedFromValue);
+    }
+
+    public static void main(String[] args) {
+        SwingUtilities.invokeLater(() -> {
+            new Client();
+        });
+    }
+}
+

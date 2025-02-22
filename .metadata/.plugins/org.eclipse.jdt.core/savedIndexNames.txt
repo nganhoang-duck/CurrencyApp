@@ -1,0 +1,7 @@
+INDEX VERSION 1.134+D:\push git\Lập trình mạng\project\BTL demo\.metadata\.plugins\org.eclipse.jdt.core
+2163298442.index
+1865797976.index
+3413270776.index
+2170478364.index
+3938781387.index
+3896775325.index

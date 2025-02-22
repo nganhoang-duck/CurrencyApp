@@ -1,0 +1,136 @@
+package clientrmi;
+
+import javax.swing.*;
+import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
+
+public class Client extends JFrame {
+    private JComboBox<Country> fromComboBox;
+    private JComboBox<Country> toComboBox;
+    private JTextField amountTextField;
+    private JTextField resultTextField;
+    private List<Country> countryList;
+
+    public Client() {
+    	String url = "jdbc:mysql://localhost:3306/currencydb";
+        String user = "root";
+        String pass = "";
+        countryList = new ArrayList<>();
+
+        try {
+        	// Kết nối với CSDL
+            Connection conn = DriverManager.getConnection(url, user, pass);
+            System.out.println("Kết nối thành công!");
+
+            // Hiển thị danh sách Flag - Code (Territory)
+            String query = "SELECT Flag, ExchangeRate, Code, Territory FROM exchangerate";
+            PreparedStatement ps = conn.prepareStatement(query);
+            ResultSet rs = ps.executeQuery();
+
+            
+	        setTitle("Chuyển đổi giá trị");
+	        JPanel mainPanel = new JPanel(new BorderLayout());
+	        JLabel title = new JLabel("Chuyển đổi tiền tệ");
+	        mainPanel.add(title, BorderLayout.NORTH);
+	
+	        JPanel containerPanel = new JPanel(new GridBagLayout()); // Sử dụng GridBagLayout
+	
+	        // From
+	        JPanel column1 = new JPanel(new BorderLayout());
+	        JLabel fromLabel = new JLabel("Chuyển đổi từ:");
+	        column1.add(fromLabel, BorderLayout.NORTH);
+	
+	        amountTextField = new JTextField();
+	        column1.add(amountTextField, BorderLayout.SOUTH);
+	        GridBagConstraints gbc1 = new GridBagConstraints();
+	        gbc1.fill = GridBagConstraints.BOTH;
+	        gbc1.weightx = 0.45; // Đặt tỉ lệ chiếm 45%
+	        gbc1.gridx = 0;
+	        containerPanel.add(column1, gbc1);
+	
+	        // Exchange button
+	        JPanel column2 = new JPanel(new BorderLayout());
+	        String imagePath = "D:/exchangeIcon.png";
+	        ImageIcon imageIcon = new ImageIcon(imagePath);
+	        JButton exchangeButton = new JButton(imageIcon);
+	        exchangeButton.addActionListener(new ActionListener() {
+	            @Override
+	            public void actionPerformed(ActionEvent e) {
+	                exchangeValues();
+	            }
+	        });
+	        column2.add(exchangeButton, BorderLayout.CENTER);
+	        GridBagConstraints gbc2 = new GridBagConstraints();
+	        gbc2.fill = GridBagConstraints.BOTH;
+	        gbc2.weightx = 0.1; // Đặt tỉ lệ chiếm 10%
+	        gbc2.gridx = 1;
+	        containerPanel.add(column2, gbc2);
+	
+	        // To
+	        JPanel column3 = new JPanel(new BorderLayout());
+	        JLabel toLabel = new JLabel("Chuyển đổi thành:");
+	        column3.add(toLabel, BorderLayout.NORTH);
+	
+	        // Dropdown
+	        while (rs.next()) {
+	            String territory = rs.getString("Territory");
+	            double exchangeRate = rs.getDouble("ExchangeRate");
+	            String flag = rs.getString("Flag");
+	            String code = rs.getString("Code");
+	            
+	            Country country = new Country(territory, exchangeRate, flag, code);
+	            countryList.add(country);
+	        }
+	        fromComboBox = new JComboBox<>(countryList.toArray(new Country[0]));
+	        fromComboBox.setRenderer(new IconComboBoxRenderer());
+
+	        toComboBox = new JComboBox<>(countryList.toArray(new Country[0]));
+	        toComboBox.setRenderer(new IconComboBoxRenderer());
+	        
+	        column1.add(fromComboBox, BorderLayout.CENTER);
+	        column3.add(toComboBox, BorderLayout.CENTER);
+	
+	        resultTextField = new JTextField();
+	        resultTextField.setEditable(false);
+	        column3.add(resultTextField, BorderLayout.SOUTH);
+	        GridBagConstraints gbc3 = new GridBagConstraints();
+	        gbc3.fill = GridBagConstraints.BOTH;
+	        gbc3.weightx = 0.45; // Đặt tỉ lệ chiếm 45%
+	        gbc3.gridx = 2;
+	        containerPanel.add(column3, gbc3);
+	
+	        mainPanel.add(containerPanel, BorderLayout.CENTER);
+	        add(mainPanel);
+	
+	        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+	        setSize(800, 400);
+	        setLocationRelativeTo(null);
+	        setVisible(true);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } 
+    }
+
+    private void exchangeValues() {
+        Country selectedFromValue = (Country) fromComboBox.getSelectedItem();
+        Country selectedToValue = (Country) toComboBox.getSelectedItem();
+
+        fromComboBox.setSelectedItem(selectedToValue);
+        toComboBox.setSelectedItem(selectedFromValue);
+    }
+
+    public static void main(String[] args) {
+        SwingUtilities.invokeLater(() -> {
+            new Client();
+        });
+    }
+}
+

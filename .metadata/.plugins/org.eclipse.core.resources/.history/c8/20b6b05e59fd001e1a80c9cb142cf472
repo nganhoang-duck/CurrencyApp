@@ -1,0 +1,5 @@
+package interfacermi;
+
+public interface IChuyenTienTe {
+
+}

@@ -1,0 +1,123 @@
+package clientrmi;
+
+import javax.swing.*;
+import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+
+public class Client extends JFrame {
+    private JComboBox<String> fromComboBox;
+    private JComboBox<String> toComboBox;
+    private JTextField amountTextField;
+    private JTextField resultTextField;
+
+    public Client() {
+        setTitle("Chuyển đổi giá trị");
+
+        // Row 1
+        JPanel row1Panel = new JPanel(new BorderLayout());
+        JLabel titleLabel = new JLabel("Chuyển đổi giá trị");
+        titleLabel.setHorizontalAlignment(JLabel.CENTER);
+        row1Panel.add(titleLabel, BorderLayout.CENTER);
+
+        // Row 2
+        JPanel row2Panel = new JPanel(new GridLayout(1, 3));
+
+        // Column 1
+        JPanel column1Panel = new JPanel(new BorderLayout());
+        JLabel fromLabel = new JLabel("Chuyển đổi từ:");
+        column1Panel.add(fromLabel, BorderLayout.NORTH);
+
+        // Create dropdown menu for column 1
+        fromComboBox = new JComboBox<>();
+        fromComboBox.setRenderer(new IconComboBoxRenderer());
+        // Add icon images and values to the dropdown menu
+        // Replace the image path with the actual path to the image directory if needed
+        fromComboBox.addItem("a");
+        fromComboBox.addItem("b");
+        fromComboBox.addItem("c");
+        // Set the default value for the dropdown menu
+        fromComboBox.setSelectedIndex(0);
+        column1Panel.add(fromComboBox, BorderLayout.CENTER);
+        
+        // Add amount input field
+        amountTextField = new JTextField();
+        column1Panel.add(amountTextField, BorderLayout.SOUTH);
+
+        row2Panel.add(column1Panel);
+
+        // Column 2
+        JPanel column2Panel = new JPanel(new BorderLayout());
+        JButton exchangeButton = new JButton(new ImageIcon("image/exchange_icon.png"));
+        exchangeButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                exchangeValues();
+            }
+        });
+        column2Panel.add(exchangeButton, BorderLayout.CENTER);
+
+        row2Panel.add(column2Panel);
+
+        // Column 3
+        JPanel column3Panel = new JPanel(new BorderLayout());
+        JLabel toLabel = new JLabel("Chuyển đổi thành:");
+        column3Panel.add(toLabel, BorderLayout.NORTH);
+
+        // Create dropdown menu for column 3
+        toComboBox = new JComboBox<>();
+        toComboBox.setRenderer(new IconComboBoxRenderer());
+        // Add icon images and values to the dropdown menu
+        // Replace the image path with the actual path to the image directory if needed
+        toComboBox.addItem("a");
+        toComboBox.addItem("b");
+        toComboBox.addItem("c");
+        // Set the default value for the dropdown menu
+        toComboBox.setSelectedIndex(1);
+        column3Panel.add(toComboBox, BorderLayout.CENTER);
+        
+        // Add result input field
+        resultTextField = new JTextField();
+        resultTextField.setEditable(false);
+        column3Panel.add(resultTextField, BorderLayout.SOUTH);
+
+        row2Panel.add(column3Panel);
+
+        // Add panels to the frame
+        add(row1Panel, BorderLayout.NORTH);
+        add(row2Panel, BorderLayout.CENTER);
+
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        setSize(400, 150);
+        setLocationRelativeTo(null);
+        setVisible(true);
+    }
+
+    private void exchangeValues() {
+        String selectedFromValue = (String) fromComboBox.getSelectedItem();
+        String selectedToValue = (String) toComboBox.getSelectedItem();
+
+        // Swap selected values
+        fromComboBox.setSelectedItem(selectedToValue);
+        toComboBox.setSelectedItem(selectedFromValue);
+    }
+
+    public static void main(String[] args) {
+        SwingUtilities.invokeLater(() -> {
+            new Client();
+        });
+    }
+}
+
+class IconComboBoxRenderer extends DefaultListCellRenderer {
+    public Component getListCellRendererComponent(JList<?> list, Object value, int index,
+                                                  boolean isSelected, boolean cellHasFocus) {
+        JLabel label = (JLabel) super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
+        if (value != null) {
+            ImageIcon icon = new ImageIcon("image/icon_" + value.toString() + ".png");
+            label.setIcon(icon);
+            label.setText(" " + value.toString());
+        }
+        return label;
+    }
+}

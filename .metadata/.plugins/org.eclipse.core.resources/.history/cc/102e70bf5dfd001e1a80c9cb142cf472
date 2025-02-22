@@ -1,0 +1,130 @@
+package clientrmi;
+
+import java.awt.Color;
+import java.awt.FlowLayout;
+import java.awt.Font;
+import java.awt.GridLayout;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.net.MalformedURLException;
+import java.rmi.Naming;
+import java.rmi.NotBoundException;
+import java.rmi.RemoteException;
+
+import javax.swing.JButton;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.JTextArea;
+import javax.swing.JTextField;
+import javax.swing.SwingUtilities;
+
+import interfacermi.ICheckNguyenTo;
+
+public class Client extends JFrame{
+	private JTextField textFieldA;
+	private JTextField textFieldB;
+	private JButton button;
+	private JTextArea resultArea;
+	
+	public Client() {
+		setTitle("Kiểm tra số nguyên tố");
+		
+		JPanel panel = new JPanel();
+		panel.setLayout(new GridLayout(5,1));
+		panel.setBackground(Color.WHITE);
+		
+		JPanel rowTitle = new JPanel();
+		rowTitle.setLayout(new FlowLayout());
+		rowTitle.setBackground(Color.WHITE);
+		JLabel title = new JLabel("KIỂM TRA SỐ NGUYÊN TỐ");
+		title.setFont(new Font("Arial", Font.BOLD, 20));
+		rowTitle.add(title);
+		
+		JPanel row1 = new JPanel();
+		row1.setLayout(new FlowLayout());
+		row1.setBackground(Color.WHITE);
+		JLabel labelA = new JLabel("Nhập số a: ");
+		textFieldA = new JTextField(20);
+		row1.add(labelA);
+		row1.add(textFieldA);
+		
+		JPanel row2 = new JPanel();
+		row2.setLayout(new FlowLayout());
+		row2.setBackground(Color.WHITE);
+		JLabel labelB = new JLabel("Nhập số b: ");
+		textFieldB = new JTextField(20);
+		row2.add(labelB);
+		row2.add(textFieldB);
+		
+		JPanel row3 = new JPanel();
+		row3.setLayout(new FlowLayout());
+		row3.setBackground(Color.WHITE);
+		button = new JButton("Kiểm tra");
+		button.setBackground(Color.lightGray);
+		button.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				try {
+					ICheckNguyenTo cnt = (ICheckNguyenTo)Naming.lookup("rmi://localhost/checknguyento");
+
+					int a = Integer.parseInt(textFieldA.getText());
+		            int b = Integer.parseInt(textFieldB.getText());
+
+		            StringBuilder result = new StringBuilder();
+		            result.append("Kết quả: ");
+
+		            if (cnt.checkNguyenTo(a)) {
+		                result.append(a).append(" là số nguyên tố, ");
+		            } else {
+		                result.append(a).append(" không là số nguyên tố, ");
+		            }
+
+		            if (cnt.checkNguyenTo(b)) {
+		                result.append(b).append(" là số nguyên tố.");
+		            } else {
+		                result.append(b).append(" không là số nguyên tố.");
+		            }
+
+		            resultArea.setText(result.toString());
+					
+				} catch (MalformedURLException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				} catch (RemoteException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				} catch (NotBoundException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				} 
+			}
+		});
+		row3.add(button);
+		
+		JPanel row4 = new JPanel();
+		row4.setLayout(new FlowLayout());
+		row4.setBackground(Color.WHITE);
+		resultArea = new JTextArea();
+		resultArea.setEditable(false);
+		row4.add(resultArea);
+		
+		panel.add(rowTitle);
+		panel.add(row1);
+		panel.add(row2);
+		panel.add(row3);
+		panel.add(row4);
+		
+		add(panel);
+
+		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		setLocationRelativeTo(null);
+		pack();
+		setVisible(true);
+	}
+
+	public static void main(String[] args) {
+		new Client();
+	}
+
+}
